@@ -16,7 +16,7 @@ export class ${capitalizeFirstLetter(name)} {
   example2: number;
 }
 
-export const ${name}Schema = SchemaFactory.createForClass(${capitalizeFirstLetter(name)});
+export const ${capitalizeFirstLetter(name)}Schema = SchemaFactory.createForClass(${capitalizeFirstLetter(name)});
   `;
 };
 
@@ -24,7 +24,7 @@ export const contentController = (name, path) => {
   return `
 import { Controller, Get, Post, Put, Delete } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ${capitalizeFirstLetter(name)}Service } from '${path}';
+import { ${capitalizeFirstLetter(name)}Service } from '${path.replace(/.ts/g, '')}';
 
 @ApiTags('${name}')
 @Controller('${name}')
@@ -69,7 +69,7 @@ export const contentService = (name, path) => {
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ${capitalizeFirstLetter(name)}, ${capitalizeFirstLetter(name)}Document } from '${path}';
+import { ${capitalizeFirstLetter(name)}, ${capitalizeFirstLetter(name)}Document } from '${path.replace(/.ts/g, '')}';
 
 @Injectable()
 export class ${capitalizeFirstLetter(name)}Service {

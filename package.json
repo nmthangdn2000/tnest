@@ -7,12 +7,20 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
-  "author": "",
+  "author": "uptimum",
   "license": "ISC",
   "bin": {
     "tnest": "./index.js"
   },
   "dependencies": {
     "commander": "^9.4.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nmthangdn2000/tnest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nmthangdn2000/tnest/issues"
+  },
+  "homepage": "https://github.com/nmthangdn2000/tnest#readme"
 }

@@ -142,13 +142,13 @@ export const editFile = async (path, name, pathImport) => {
 
     if (checkImport && !listLine[index + 1]) {
       if (!isImportController) {
-        l = l + '\n' + `import { ${name}Controller } from '${pathImport.controller}';`;
+        l = l + '\n' + `import { ${name}Controller } from '${pathImport.controller.replace(/.ts/g, '')}';`;
       }
       if (!isImportSerivice) {
-        l = l + '\n' + `import { ${name}Service } from '${pathImport.service}';`;
+        l = l + '\n' + `import { ${name}Service } from '${pathImport.service.replace(/.ts/g, '')}';`;
       }
       if (!isImportSchema) {
-        l = l + '\n' + `import { ${name}, ${name}Schema } from '${pathImport.schema}';`;
+        l = l + '\n' + `import { ${name}, ${name}Schema } from '${pathImport.schema.replace(/.ts/g, '')}';`;
       }
       return l;
     }
