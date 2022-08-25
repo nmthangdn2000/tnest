@@ -1,0 +1,1 @@
+yarn add chalk chalk-animation figlet gradient-string inquirer nanospinner
