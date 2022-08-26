@@ -76,14 +76,14 @@ export const importLib = (name, contentFile, pathImport) => {
   if (regexModuleTag.test(contentFile)) {
     let txtImport = '';
     if (!regexControllerImport.test(contentFile)) {
-      txtImport = txtImport + `import{${name}Controller}from'${pathImport.controller}';`;
+      txtImport = txtImport + `import{${name}Controller}from'${pathImport.controller.replace(/.ts/g, '')}';`;
     }
     if (!regexServiceImport.test(contentFile)) {
-      txtImport = txtImport + `import{${name}Service}from'${pathImport.service}';`;
+      txtImport = txtImport + `import{${name}Service}from'${pathImport.service.replace(/.ts/g, '')}';`;
     }
     console.log();
     if (!regexSchemaImport.test(contentFile)) {
-      txtImport = txtImport + `import{${name},${name}Schema}from'${pathImport.schema}';`;
+      txtImport = txtImport + `import{${name},${name}Schema}from'${pathImport.schema.replace(/.ts/g, '')}';`;
     }
     contentFile = contentFile.replace(regexModuleTag, txtImport + '\r\n@Module({');
   }
