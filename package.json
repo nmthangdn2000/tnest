@@ -13,7 +13,8 @@
     "tnest": "./index.js"
   },
   "dependencies": {
-    "commander": "^9.4.0"
+    "commander": "^9.4.0",
+    "prettier": "^2.7.1"
   },
   "repository": {
     "type": "git",

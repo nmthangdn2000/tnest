@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { createFile, main } from './method.js';
+import { main } from './method.js';
 
 const program = new Command();
 

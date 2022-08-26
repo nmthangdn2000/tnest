@@ -1,19 +1,32 @@
 import fs from 'fs';
-import { contentController, contentSchema, contentService } from './content.js';
+import { contentController, contentModule, contentSchema, contentService } from './content.js';
 import readline from 'readline';
+import prettier from 'prettier';
+import { controllerModule, exportClass, importLib, importModule, mongooseModule, providerModule } from './edit-file.js';
 
 export const main = async (name, path, options) => {
   const nameFile = name.toLowerCase();
   path = path || '';
+  const genera = options?.genera || false;
   const pathFolder = path?.substring(0, 4) === 'src/' ? path.slice(4) : path;
-  const rootFolder = options?.genera ? `src${pathFolder && '/' + pathFolder}/${nameFile}` : `src/${pathFolder}`;
-  const files = await createFile(nameFile, rootFolder, options?.genera);
+  const rootFolder = genera ? `src${pathFolder && '/' + pathFolder}/${nameFile}` : `src/${pathFolder}`;
+  const files = await createFile(nameFile, rootFolder, genera);
   const pathFiles = { controller: files[0].path, service: files[1].path, schema: files[2].path };
-  const data = await findFile(rootFolder);
-  editFile(data.path, capitalizeFirstLetter(name), pathFiles);
+  const data = await findFile(rootFolder, genera);
+  console.log(data);
+  if (data.filename) {
+    editFile(data.path, capitalizeFirstLetter(name), pathFiles);
+  } else {
+    const pathFindModule = `src/${pathFolder}`;
+    createFileModule(nameFile, rootFolder, pathFiles);
+    const file = await findFile(pathFindModule, false);
+    if (file.filename) {
+      editFileModule(file.path, capitalizeFirstLetter(nameFile), `${rootFolder}/${nameFile}.module`);
+    }
+  }
 };
 
-export const createFile = (name, rootFolder, genera = false) => {
+const createFile = (name, rootFolder, genera = false) => {
   const pathSchema = `${rootFolder}${genera ? '' : '/schemas'}/${name}.schema.ts`;
   const pathController = `${rootFolder}${genera ? '' : '/controllers'}/${name}.controller.ts`;
   const pathService = `${rootFolder}${genera ? '' : '/services'}/${name}.service.ts`;
@@ -49,30 +62,44 @@ export const createFile = (name, rootFolder, genera = false) => {
   });
 };
 
+const createFileModule = (name, rootFolder, pathFiles) => {
+  const pathModule = `${rootFolder}/${name}.module.ts`;
+  const content = contentModule(name, pathFiles);
+  fs.writeFile(pathModule, content, (err) => {
+    if (err) {
+      reject(err);
+      return console.log(err);
+    }
+    console.log(pathModule + ' File is created successfully.');
+  });
+};
+
 export const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-export const findFile = (path) => {
+const findFile = (path, genera) => {
   const regex = /module.ts/g;
   let txtPath = '';
   const listDir = [];
-  path.split('/').forEach((e) => {
-    if (!e) return;
-    if (!txtPath) txtPath = txtPath + e;
-    else txtPath = txtPath + '/' + e;
-    listDir.push(txtPath);
-  });
+  if (genera) {
+    listDir.push(path);
+  } else {
+    path.split('/').forEach((e) => {
+      if (!e) return;
+      if (!txtPath) txtPath = txtPath + e;
+      else txtPath = txtPath + '/' + e;
+      listDir.push(txtPath);
+    });
+  }
 
   return new Promise((resolve, reject) => {
     listDir.reverse().some((dir) => {
       try {
         const files = fs.readdirSync(dir);
         const filename = files.find((f) => regex.test(f));
-        if (filename) {
-          resolve({ filename, path: dir + '/' + filename });
-          return true;
-        }
+        resolve({ filename, path: dir + '/' + filename });
+        return true;
       } catch (error) {
         reject(error);
       }
@@ -80,11 +107,32 @@ export const findFile = (path) => {
   });
 };
 
-export const editFile = async (path, name, pathImport) => {
-  const regexController = new RegExp(`${name}Controller`, 'g');
-  const regexService = new RegExp(`${name}Service`, 'g');
-  const regexSchema = new RegExp(`${name}Schema`, 'g');
+const editFile = async (path, name, pathImport) => {
+  let contentFile = await getContentFile(path);
 
+  contentFile = importLib(name, contentFile, pathImport);
+
+  contentFile = mongooseModule(name, contentFile);
+
+  contentFile = controllerModule(name, contentFile);
+
+  contentFile = providerModule(name, contentFile);
+
+  contentFile = exportClass(contentFile);
+
+  writeFileFormat(path, contentFile);
+};
+
+const editFileModule = async (path, name, pathImport) => {
+  let contentFile = await getContentFile(path);
+
+  contentFile = importModule(name, contentFile, pathImport);
+  contentFile = exportClass(contentFile);
+
+  writeFileFormat(path, contentFile);
+};
+
+const getContentFile = async (path) => {
   const lineReader = readline.createInterface({
     input: fs.createReadStream(path),
     crlfDelay: Infinity,
@@ -95,112 +143,15 @@ export const editFile = async (path, name, pathImport) => {
     listLine.push(line);
   }
 
-  let isImportController = false;
-  let isImportSerivice = false;
-  let isImportSchema = false;
-  let isController = false;
-  let isSchema = false;
-  let isService = false;
-  let isTagMongooseModule = false;
-  let isTagController = false;
-  let isTagService = false;
-
-  const newListLine = listLine.map((l, index) => {
-    const regexImport = /import/g;
-    const regexMongoModule = /MongooseModule.forFeature/g;
-    const regexControllerModule = /controllers/g;
-    const regexProvidersModule = /providers:/g;
-    const regexEnd = /\]\)/g;
-    const regexNameKey = /name:/g;
-    const regexSchemaKey = /schema:/g;
-
-    const checkImport = regexImport.test(l);
-    const checkController = regexController.test(l);
-    const checkControllerModule = regexControllerModule.test(l);
-
-    const checkSerivice = regexService.test(l);
-    const checkProvidersModule = regexProvidersModule.test(l);
-
-    const checkMongo = regexMongoModule.test(l);
-    const checkNameKey = regexNameKey.test(l);
-    const checkSchemaKey = regexSchemaKey.test(l);
-    const checkSchema = regexSchema.test(l);
-    const checkEndMongo = regexEnd.test(l);
-
-    if (checkImport && checkController) isImportController = true;
-    if (checkImport && checkSerivice) isImportSerivice = true;
-
-    if (checkControllerModule) isTagController = true;
-    if (isTagController && checkController) isController = true;
-
-    if (checkProvidersModule) isTagService = true;
-    if (isTagService && checkSerivice) isService = true;
-
-    if (checkImport && checkSchema) isImportSchema = true;
-    if (checkMongo) isTagMongooseModule = true;
-    if (checkNameKey && checkSchemaKey && checkSchema) isSchema = true;
-
-    if (checkImport && !listLine[index + 1]) {
-      if (!isImportController) {
-        l = l + '\n' + `import { ${name}Controller } from '${pathImport.controller.replace(/.ts/g, '')}';`;
-      }
-      if (!isImportSerivice) {
-        l = l + '\n' + `import { ${name}Service } from '${pathImport.service.replace(/.ts/g, '')}';`;
-      }
-      if (!isImportSchema) {
-        l = l + '\n' + `import { ${name}, ${name}Schema } from '${pathImport.schema.replace(/.ts/g, '')}';`;
-      }
-      return l;
-    }
-
-    if (checkMongo && checkNameKey && checkSchemaKey) {
-      const splitString = l.split('])');
-      const lastString = splitString[0].trim()[splitString[0].trim().length - 1] === ',' ? '' : ',';
-      return splitString[0] + lastString + `{ name: ${name}.name, schema: ${name}Schema }])` + splitString[1] || '';
-    } else if (!isSchema && isTagMongooseModule && checkEndMongo) {
-      return `      { name: ${name}.name, schema: ${name}Schema }, \n  ]),`;
-    }
-
-    if (isTagController && !isController) {
-      if (!checkControllerModule && /\],/g.test(l)) {
-        isTagController = false;
-        return `    ${name}Controller, \n  ],`;
-      } else if (regexProvidersModule.test(listLine[index + 1])) {
-        const splitString = l.split('],');
-        isTagController = false;
-        return splitString[0] + getLastString(splitString[0]) + ` ${name}Controller],`;
-      }
-    }
-
-    if (isTagService && !isService) {
-      if (!checkProvidersModule && /\],/g.test(l)) {
-        isTagService = false;
-        return `    ${name}Service, \n  ],`;
-      } else if (/\}\)/g.test(listLine[index + 1])) {
-        const splitString = l.split('],');
-        isTagService = false;
-        return splitString[0] + getLastString(splitString[0]) + ` ${name}Service],`;
-      }
-    }
-
-    return l;
-  });
-
-  console.log(path);
-  fs.writeFile(path, newListLine.join('\n'), (err) => {
-    if (err) {
-      console.error(err);
-    }
-    console.log('Write success');
-  });
+  return listLine.join('').replaceAll(/\s/g, '');
 };
 
-// (async () => {
-//   const data = await findFile('src/apis/controllers');
-//   console.log(data);
-//   editFile(data.path, 'MAAAAAAAAAAAAA', { controller: 'controller', service: 'service', schema: 'schema' });
-// })();
-
-function getLastString(splitString) {
-  return splitString.trim()[splitString.trim().length - 1] === ',' ? '' : ',';
-}
+const writeFileFormat = (path, content) => {
+  const dataFromat = prettier.format(content, { semi: true, parser: 'typescript', singleQuote: true, trailingComma: 'all' });
+  fs.writeFile(path, dataFromat, (err) => {
+    if (err) {
+      return console.log(err);
+    }
+    console.log(path + ' File is update successfully.');
+  });
+};

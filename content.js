@@ -101,3 +101,20 @@ export class ${capitalizeFirstLetter(name)}Service {
 
   `;
 };
+
+export const contentModule = (name, path) => {
+  return `import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ${capitalizeFirstLetter(name)}Controller } from '${path.controller.replace(/.ts/g, '')}';
+import { ${capitalizeFirstLetter(name)}Service } from '${path.service.replace(/.ts/g, '')}';
+import { ${capitalizeFirstLetter(name)}, ${capitalizeFirstLetter(name)}Schema } from '${path.schema.replace(/.ts/g, '')}';
+
+@Module({
+  imports: [MongooseModule.forFeature([{ name: ${capitalizeFirstLetter(name)}.name, schema: ${capitalizeFirstLetter(name)}Schema }])],
+  controllers: [${capitalizeFirstLetter(name)}Controller],
+  providers: [${capitalizeFirstLetter(name)}Service],
+})
+
+export class ${capitalizeFirstLetter(name)}Module {}
+`;
+};
