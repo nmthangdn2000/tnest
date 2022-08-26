@@ -81,7 +81,6 @@ export const importLib = (name, contentFile, pathImport) => {
     if (!regexServiceImport.test(contentFile)) {
       txtImport = txtImport + `import{${name}Service}from'${pathImport.service.replace(/.ts/g, '')}';`;
     }
-    console.log();
     if (!regexSchemaImport.test(contentFile)) {
       txtImport = txtImport + `import{${name},${name}Schema}from'${pathImport.schema.replace(/.ts/g, '')}';`;
     }
@@ -125,7 +124,6 @@ export const importModule = (name, contentFile, path) => {
     }
     contentFile = contentFile.replace(regexModuleTag, txtImport + '\r\n@Module({');
   }
-  console.log(contentFile);
 
   return contentFile;
 };

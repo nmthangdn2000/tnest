@@ -1,4 +1,5 @@
 import fs from 'fs';
+import chalk from 'chalk';
 import { contentController, contentModule, contentSchema, contentService } from './content.js';
 import readline from 'readline';
 import prettier from 'prettier';
@@ -13,7 +14,6 @@ export const main = async (name, path, options) => {
   const files = await createFile(nameFile, rootFolder, genera);
   const pathFiles = { controller: files[0].path, service: files[1].path, schema: files[2].path };
   const data = await findFile(rootFolder, genera);
-  console.log(data);
   if (data.filename) {
     editFile(data.path, capitalizeFirstLetter(name), pathFiles);
   } else {
@@ -50,10 +50,10 @@ const createFile = (name, rootFolder, genera = false) => {
           reject(err);
           return console.log(err);
         }
-        console.log(path + 'File is created successfully.');
+        console.log(chalk.green('CREATE') + ' ' + path);
+
         setTimeout(() => {
           if (index === files.length - 1) {
-            console.log('Done');
             resolve(files);
           }
         }, 0);
@@ -70,7 +70,7 @@ const createFileModule = (name, rootFolder, pathFiles) => {
       reject(err);
       return console.log(err);
     }
-    console.log(pathModule + ' File is created successfully.');
+    console.log(chalk.green('CREATE') + ' ' + pathModule);
   });
 };
 
@@ -152,6 +152,6 @@ const writeFileFormat = (path, content) => {
     if (err) {
       return console.log(err);
     }
-    console.log(path + ' File is update successfully.');
+    console.log(chalk.blue('UPDATE') + ' ' + path);
   });
 };

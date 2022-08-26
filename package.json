@@ -13,6 +13,7 @@
     "tnest": "./index.js"
   },
   "dependencies": {
+    "chalk": "^5.0.1",
     "commander": "^9.4.0",
     "prettier": "^2.7.1"
   },
