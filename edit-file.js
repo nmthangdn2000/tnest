@@ -109,14 +109,6 @@ export const importModule = (name, contentFile, path) => {
   const regexModuleImport = new RegExp(`import{${name}Module`, 'g');
   const regexModule = new RegExp(`${name}Module`, 'g');
 
-  if (regexModuleTag.test(contentFile)) {
-    let txtImport = '';
-    if (!regexModuleImport.test(contentFile)) {
-      txtImport = txtImport + `import{${name}Module}from'${path}';`;
-    }
-    contentFile = contentFile.replace(regexModuleTag, txtImport + '\r\n@Module({');
-  }
-
   const txtModuleOption = contentFile.match(regexImportOption)[0];
   if (txtModuleOption && !regexModule.test(contentFile)) {
     const txtModule = `${name}Module`;
@@ -125,6 +117,15 @@ export const importModule = (name, contentFile, path) => {
 
     contentFile = contentFile.replace(regexImportOption, splitTxt[0] + lastChar + txtModule + '],controllers');
   }
+
+  if (regexModuleTag.test(contentFile)) {
+    let txtImport = '';
+    if (!regexModuleImport.test(contentFile)) {
+      txtImport = txtImport + `import{${name}Module}from'${path}';`;
+    }
+    contentFile = contentFile.replace(regexModuleTag, txtImport + '\r\n@Module({');
+  }
+  console.log(contentFile);
 
   return contentFile;
 };
