@@ -9,9 +9,11 @@ export const main = async (name, path, options) => {
   const nameFile = name.toLowerCase();
   path = path || '';
   const genera = options?.genera || false;
+  const overwrite = options?.overwrite || false;
+
   const pathFolder = path?.substring(0, 4) === 'src/' ? path.slice(4) : path;
   const rootFolder = genera ? `src${pathFolder && '/' + pathFolder}/${nameFile}` : `src/${pathFolder}`;
-  const files = await createFile(nameFile, rootFolder, genera);
+  const files = await createFile(nameFile, rootFolder, genera, overwrite);
   const pathFiles = { controller: files[0].path, service: files[1].path, schema: files[2].path };
   const data = await findFile(rootFolder, genera);
   if (data.filename) {
@@ -26,7 +28,7 @@ export const main = async (name, path, options) => {
   }
 };
 
-const createFile = (name, rootFolder, genera = false) => {
+const createFile = (name, rootFolder, genera = false, overwrite) => {
   const pathSchema = `${rootFolder}${genera ? '' : '/schemas'}/${name}.schema.ts`;
   const pathController = `${rootFolder}${genera ? '' : '/controllers'}/${name}.controller.ts`;
   const pathService = `${rootFolder}${genera ? '' : '/services'}/${name}.service.ts`;
@@ -43,6 +45,7 @@ const createFile = (name, rootFolder, genera = false) => {
       const folders = path.split('/');
       folders.pop();
       const pathDir = folders.join('/');
+      if (!overwrite && fs.existsSync(path)) return resolve(files);
       if (!fs.existsSync(pathDir)) fs.mkdirSync(pathDir, { recursive: true });
 
       fs.writeFile(path, content, (err) => {

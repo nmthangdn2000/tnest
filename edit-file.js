@@ -10,7 +10,7 @@ export const mongooseModule = (name, contentFile) => {
       const splitTxt = txtImportOption.split('],');
       const lastChar = splitTxt[0][splitTxt[0].length - 1] === ',' ? '' : ',';
 
-      txtImportOption = splitTxt[0] + txtMongo + lastChar + '],';
+      txtImportOption = splitTxt[0] + lastChar + txtMongo + '],';
       contentFile = contentFile.replace(regexImportOption, txtImportOption);
     }
   } else {

@@ -13,6 +13,7 @@ program
   .argument('[path_folder]', 'path folder if null is src/. For example: src/apis or apis')
   .description('CLi generates schema, controller, and service files according to the name you enter')
   .option('-g, --genera', 'genera a folder')
+  .option('-o, --overwrite', 'overwrite existing files')
   .action(main);
 
 program.parse();
