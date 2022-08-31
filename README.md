@@ -77,3 +77,10 @@ src
     │   └── product.module.ts (CREATE)
     └── apis.module.ts (UPDATE)
 ```
+
+These are the command line flags included in the tool:
+
+```
+-g, --genera      genera a folder
+-o, --overwrite   overwrite existing files
+```
