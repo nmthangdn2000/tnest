@@ -15,13 +15,13 @@ export const main = async (name, path, options) => {
   const rootFolder = genera ? `src${pathFolder && '/' + pathFolder}/${nameFile}` : `src/${pathFolder}`;
   const files = await createFile(nameFile, rootFolder, genera, overwrite);
   const pathFiles = { controller: files[0].path, service: files[1].path, schema: files[2].path };
-  const data = await findFile(rootFolder, genera);
+  const data = await findFile(rootFolder);
   if (data.filename) {
     editFile(data.path, capitalizeFirstLetter(name), pathFiles);
   } else {
     const pathFindModule = `src/${pathFolder}`;
     createFileModule(nameFile, rootFolder, pathFiles);
-    const file = await findFile(pathFindModule, false);
+    const file = await findFile(pathFindModule);
     if (file.filename) {
       editFileModule(file.path, capitalizeFirstLetter(nameFile), `${rootFolder}/${nameFile}.module`);
     }
@@ -85,16 +85,13 @@ const findFile = (path, genera) => {
   const regex = /module.ts/g;
   let txtPath = '';
   const listDir = [];
-  if (genera) {
-    listDir.push(path);
-  } else {
-    path.split('/').forEach((e) => {
-      if (!e) return;
-      if (!txtPath) txtPath = txtPath + e;
-      else txtPath = txtPath + '/' + e;
-      listDir.push(txtPath);
-    });
-  }
+
+  path.split('/').forEach((e) => {
+    if (!e) return;
+    if (!txtPath) txtPath = txtPath + e;
+    else txtPath = txtPath + '/' + e;
+    listDir.push(txtPath);
+  });
 
   return new Promise((resolve, reject) => {
     listDir.reverse().some((dir) => {
