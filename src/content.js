@@ -1,5 +1,11 @@
 import { capitalizeFirstLetter } from './method.js';
 
+const replaceCapitalizeName = /CAPITALIZE/g;
+const replaceName = /NAME/g;
+const replacePathController = /PATH_CONTROLLER/g;
+const replacePathSchema = /PATH_SCHEMA/g;
+const replacePathService = /PATH_SERVICE/g;
+
 export const contentSchema = (name) => {
   return `
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
@@ -21,47 +27,82 @@ export const ${capitalizeFirstLetter(name)}Schema = SchemaFactory.createForClass
 };
 
 export const contentController = (name, path) => {
-  return `
-import { Controller, Get, Post, Put, Delete } from '@nestjs/common';
+  return `import { Controller, Get, Post, Put, Delete, Logger } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ${capitalizeFirstLetter(name)}Service } from '${path.replace(/.ts/g, '')}';
 
-@ApiTags('${name}')
-@Controller('${name}')
+@ApiTags('${name}s')
+@Controller('${name}s')
 export class ${capitalizeFirstLetter(name)}Controller {
   constructor(private readonly ${name}Service: ${capitalizeFirstLetter(name)}Service) {}
+
+  private readonly logger = new Logger(${capitalizeFirstLetter(name)}Controller.name);
 
   @ApiOperation({ summary: 'Get all ${name}' })
   @Get()
   async getAll() {
-    return this.${name}Service.getAll();
+    try {
+      const result = await this.${name}Service.getAll();
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
   }
 
   @ApiOperation({ summary: 'Get a ${name} by id' })
   @Get(':id')
   async getById() {
-    return this.${name}Service.getById();
+    try {
+      const result = await this.${name}Service.getById();
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
   }
 
   @ApiOperation({ summary: 'Create a ${name}' })
   @Post()
   async create() {
-    return this.${name}Service.create();
+    try {
+      const result = await this.${name}Service.create();
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
   }
 
   @ApiOperation({ summary: 'Update a ${name}' })
   @Put(':id')
   async updateById() {
-    return this.${name}Service.updateById();
+    try {
+      const result = await this.${name}Service.updateById();
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
   }
 
   @ApiOperation({ summary: 'Delete a ${name}' })
   @Delete(':id')
   async deleteById() {
-    return await this.${name}Service.deleteById();
+    try {
+      const result = await this.${name}Service.deleteById();
+      return responseSuccess(result);
+    } catch (error) {
+      console.log(error.message);
+      this.logger.error(error.stack);
+      return responseError(error.message || error);
+    }
   }
-}
-  `;
+}`;
 };
 
 export const contentService = (name, path) => {
@@ -82,12 +123,16 @@ export class ${capitalizeFirstLetter(name)}Service {
     return;
   }
 
-  async getById() {
-    return;
+  async getById(id: string) {
+    const ${name} = await this.${name}Model.findById(id).lean();
+    if(!${name}) throw new Error('${capitalizeFirstLetter(name)} with id is ')
+    return ${name};
   }
 
-  async create() {
-    return;
+  async create(data: ${capitalizeFirstLetter(name)}Dto) {
+    const ${name}Instance = plainToInstance(${capitalizeFirstLetter(name)}, data);
+    const new${capitalizeFirstLetter(name)} = new this.${name}Model(${name}Instance);
+    return new${capitalizeFirstLetter(name)}.save();
   }
 
   async updateById() {
@@ -97,9 +142,7 @@ export class ${capitalizeFirstLetter(name)}Service {
   async deleteById() {
     return;
   }
-}
-
-  `;
+}`;
 };
 
 export const contentModule = (name, path) => {

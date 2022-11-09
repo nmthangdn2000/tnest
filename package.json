@@ -1,16 +1,16 @@
 {
   "name": "tnest-cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js"
   },
   "type": "module",
   "author": "uptimum",
   "license": "ISC",
   "bin": {
-    "tnest": "./index.js"
+    "tnest": "./src/index.js"
   },
   "dependencies": {
     "chalk": "^5.0.1",

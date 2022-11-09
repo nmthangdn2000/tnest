@@ -1,6 +1,6 @@
 import fs from 'fs';
 import chalk from 'chalk';
-import { contentController, contentModule, contentSchema, contentService } from './content.js';
+import { contentController, contentDto, contentFilterDto, contentModule, contentSchema, contentService } from './process-content.js';
 import readline from 'readline';
 import prettier from 'prettier';
 import { controllerModule, exportClass, importLib, importModule, mongooseModule, providerModule } from './edit-file.js';
@@ -20,7 +20,7 @@ export const main = async (name, path, options) => {
     editFile(data.path, capitalizeFirstLetter(name), pathFiles);
   } else {
     const pathFindModule = `src/${pathFolder}`;
-    createFileModule(nameFile, rootFolder, pathFiles);
+    await createFileModule(nameFile, rootFolder, pathFiles);
     const file = await findFile(pathFindModule);
     if (file.filename) {
       editFileModule(file.path, capitalizeFirstLetter(nameFile), `${rootFolder}/${nameFile}.module`);
@@ -28,15 +28,19 @@ export const main = async (name, path, options) => {
   }
 };
 
-const createFile = (name, rootFolder, genera = false, overwrite) => {
+const createFile = async (name, rootFolder, genera = false, overwrite) => {
   const pathSchema = `${rootFolder}${genera ? '' : '/schemas'}/${name}.schema.ts`;
   const pathController = `${rootFolder}${genera ? '' : '/controllers'}/${name}.controller.ts`;
   const pathService = `${rootFolder}${genera ? '' : '/services'}/${name}.service.ts`;
+  const pathDto = `${rootFolder}/dtos/${name}.dto.ts`;
+  const pathFilterDto = `${rootFolder}/dtos/${name}-filter.dto.ts`;
 
   const files = [
-    { path: pathController, content: contentController(name, pathService) },
-    { path: pathService, content: contentService(name, pathSchema) },
-    { path: pathSchema, content: contentSchema(name) },
+    { path: pathController, content: await contentController(name, pathService, pathDto, pathFilterDto) },
+    { path: pathService, content: await contentService(name, pathSchema, pathDto, pathFilterDto) },
+    { path: pathSchema, content: await contentSchema(name) },
+    { path: pathDto, content: await contentDto(name) },
+    { path: pathFilterDto, content: await contentFilterDto(name) },
   ];
 
   return new Promise((resolve, reject) => {
@@ -65,9 +69,9 @@ const createFile = (name, rootFolder, genera = false, overwrite) => {
   });
 };
 
-const createFileModule = (name, rootFolder, pathFiles) => {
+const createFileModule = async (name, rootFolder, pathFiles) => {
   const pathModule = `${rootFolder}/${name}.module.ts`;
-  const content = contentModule(name, pathFiles);
+  const content = await contentModule(name, pathFiles);
   fs.writeFile(pathModule, content, (err) => {
     if (err) {
       reject(err);
@@ -129,7 +133,7 @@ const editFileModule = async (path, name, pathImport) => {
   contentFile = importModule(name, contentFile, pathImport);
   contentFile = exportClass(contentFile);
 
-  writeFileFormat(path, contentFile);
+  writeFileFormat(path, contentFile.replace('implement', ' implement '));
 };
 
 const getContentFile = async (path) => {
