@@ -1,6 +1,9 @@
 import { capitalizeFirstLetter } from './method.js';
 import * as fs from 'fs';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const replaceCapitalizeName = /CAPITALIZE/g;
 const replaceName = /NAME/g;
@@ -12,9 +15,9 @@ const replacePathFilterDto = /PATH_FILTER_DTO/g;
 
 export const contentSchema = async (name) => {
   try {
-    const filePath = 'src/contents/schema.ts';
+    const filePath = 'contents/schema.ts';
 
-    const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+    const content = fs.readFileSync(path.resolve(__dirname, filePath), { encoding: 'utf-8' });
     return content.replace(replaceCapitalizeName, capitalizeFirstLetter(name));
   } catch (error) {
     throw new Error(error);
@@ -23,9 +26,9 @@ export const contentSchema = async (name) => {
 
 export const contentController = async (name, pathService, pathDto, pathFilterDto) => {
   try {
-    const filePath = 'src/contents/controller.ts';
+    const filePath = 'contents/controller.ts';
 
-    const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+    const content = fs.readFileSync(path.resolve(__dirname, filePath), { encoding: 'utf-8' });
     return content
       .replace(replaceCapitalizeName, capitalizeFirstLetter(name))
       .replace(replaceName, name)
@@ -39,9 +42,9 @@ export const contentController = async (name, pathService, pathDto, pathFilterDt
 
 export const contentService = async (name, pathSchema, pathDto, pathFilterDto) => {
   try {
-    const filePath = 'src/contents/schema.ts';
+    const filePath = 'contents/service.ts';
 
-    const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+    const content = fs.readFileSync(path.resolve(__dirname, filePath), { encoding: 'utf-8' });
     return content
       .replace(replaceCapitalizeName, capitalizeFirstLetter(name))
       .replace(replaceName, name)
@@ -53,16 +56,16 @@ export const contentService = async (name, pathSchema, pathDto, pathFilterDto) =
   }
 };
 
-export const contentModule = async (name, path) => {
+export const contentModule = async (name, pathImport) => {
   try {
-    const filePath = 'src/contents/schema.ts';
+    const filePath = 'contents/module.ts';
 
-    const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+    const content = fs.readFileSync(path.resolve(__dirname, filePath), { encoding: 'utf-8' });
     return content
       .replace(replaceCapitalizeName, capitalizeFirstLetter(name))
-      .replace(replacePathController, path.controller.replace(/.ts/g, ''))
-      .replace(replacePathService, path.service.replace(/.ts/g, ''))
-      .replace(replacePathSchema, path.schema.replace(/.ts/g, ''));
+      .replace(replacePathController, pathImport.controller.replace(/.ts/g, ''))
+      .replace(replacePathService, pathImport.service.replace(/.ts/g, ''))
+      .replace(replacePathSchema, pathImport.schema.replace(/.ts/g, ''));
   } catch (error) {
     throw new Error(error);
   }
@@ -70,9 +73,9 @@ export const contentModule = async (name, path) => {
 
 export const contentDto = async (name) => {
   try {
-    const filePath = 'src/contents/dto.ts';
+    const filePath = 'contents/dto.ts';
 
-    const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+    const content = fs.readFileSync(path.resolve(__dirname, filePath), { encoding: 'utf-8' });
     return content.replace(replaceCapitalizeName, capitalizeFirstLetter(name));
   } catch (error) {
     throw new Error(error);
@@ -81,9 +84,9 @@ export const contentDto = async (name) => {
 
 export const contentFilterDto = async (name) => {
   try {
-    const filePath = 'src/contents/dto.ts';
+    const filePath = 'contents/dto.ts';
 
-    const content = fs.readFileSync(filePath, { encoding: 'utf-8' });
+    const content = fs.readFileSync(path.resolve(__dirname, filePath), { encoding: 'utf-8' });
     return content.replace(replaceCapitalizeName, `${capitalizeFirstLetter(name)}Filter`);
   } catch (error) {
     throw new Error(error);

@@ -5,7 +5,14 @@ import { CAPITALIZEService } from 'PATH_SERVICE';
 import { CAPITALIZE, CAPITALIZESchema } from 'PATH_SCHEMA';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: CAPITALIZE.name, schema: CAPITALIZESchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      {
+        name: CAPITALIZE.name,
+        schema: CAPITALIZESchema,
+      },
+    ]),
+  ],
   controllers: [CAPITALIZEController],
   providers: [CAPITALIZEService],
 })
