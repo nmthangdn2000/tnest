@@ -48,7 +48,7 @@ export class CAPITALIZEService {
     const NAME = await this.NAMEModel.findById(id).lean();
     if (!NAME) throw new Error(`CAPITALIZE with id is ${id} does not exist`);
 
-    const NAMEInstance = plainToInstance(NAME, data);
+    const NAMEInstance = plainToInstance(CAPITALIZE, data);
 
     removeKeyUndefined(NAMEInstance);
 
